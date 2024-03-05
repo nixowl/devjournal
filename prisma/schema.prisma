@@ -9,12 +9,52 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
-  url      = env("DATABASE_URL")
+  provider     = "mysql"
+  url          = env("DATABASE_URL")
   relationMode = "prisma"
 }
 
+// Represents a User in the system
 model User {
-  id String @id @default(uuid())
+  id        String   @id @default(uuid()) // Unique identifier for the User
+  createdAt DateTime @default(now()) // Date and time when the User was created
+  updatedAt DateTime @updatedAt // Date and time when the User was last updated
 
+  clerkId String         @unique // Unique identifier for the User's clerk
+  email   String         @unique // Unique email address of the User
+  entries JournalEntry[] // List of JournalEntries associated with the User
 }
+
+// Represents a Journal Entry in the system
+model JournalEntry {
+  id        String   @id @default(uuid()) // Unique identifier for the JournalEntry
+  createdAt DateTime @default(now()) // Date and time when the JournalEntry was created
+  updatedAt DateTime @updatedAt // Date and time when the JournalEntry was last updated
+
+  userId String // Foreign key referencing the User model
+  user   User   @relation(fields: [userId], references: [id]) // Relation to the User model using the userId field
+
+  content String @db.Text // Content of the JournalEntry
+
+  analysis Analysis? // Optional relation to the Analysis model
+
+  @@index([userId]) // Index on the userId field for faster queries
+}
+
+// Represents an Analysis of a Journal Entry
+model Analysis {
+  id        String   @id @default(uuid()) // Unique identifier for the Analysis
+  createdAt DateTime @default(now()) // Date and time when the Analysis was created
+  updatedAt DateTime @updatedAt // Date and time when the Analysis was last updated
+
+  entryId String // Foreign key referencing the JournalEntry model
+  entry   JournalEntry @relation(fields: [entryId], references: [id]) // Relation to the JournalEntry model using the entryId field
+
+  topic   String // Topic of the Analysis
+  summary String @db.Text // Summary of the Analysis
+  color   String // Color associated with the Analysis
+
+  @@unique([entryId]) // Ensures uniqueness of the entryId field
+}
+
+// After making changes to db, run npx prisma db push
