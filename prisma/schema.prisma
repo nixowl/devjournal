@@ -38,7 +38,7 @@ model JournalEntry {
 
   analysis Analysis? // Optional relation to the Analysis model
 
-  @@index([userId]) // Index on the userId field for faster queries
+  @@unique([userId, id]) 
 }
 
 // Represents an Analysis of a Journal Entry
