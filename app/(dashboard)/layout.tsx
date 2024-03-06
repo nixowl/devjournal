@@ -4,10 +4,10 @@ import Header from "@/components/dashboard/Header";
 import Sidebar from "@/components/dashboard/Sidebar";
 
 const DashboardLayout = ({ children }) => {
-    return <div className="flex flex-col h-full w-full">
-        <Header />
-        <div className="w-full flex flex-1">
-            <Sidebar />
+    return <div className="flex flex-row h-screen w-screen">
+        <Sidebar />
+        <div className="w-full h-full flex flex-col flex-1">
+            <Header />
             {children}
         </div>
         
