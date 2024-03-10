@@ -48,8 +48,9 @@ model Analysis {
   updatedAt DateTime @updatedAt // Date and time when the Analysis was last updated
 
   entryId String // Foreign key referencing the JournalEntry model
-  entry   JournalEntry @relation(fields: [entryId], references: [id]) // Relation to the JournalEntry model using the entryId field
+  entry   JournalEntry @relation(fields: [entryId], references: [id], onDelete: Cascade) // Relation to the JournalEntry model using the entryId field
 
+  title String // AI generated journal entry title
   topic   String // Topic of the Analysis
   summary String @db.Text // Summary of the Analysis
   color   String // Color associated with the Analysis
