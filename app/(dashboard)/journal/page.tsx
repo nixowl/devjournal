@@ -5,17 +5,15 @@ import { prisma } from '@/utils/db';
 import Link from 'next/link';
 
 // Requires logic for getting the authorized user in the prisma database based on the clerkId, helper function in auth.ts
-// TODO: Fix 'property id does not exist on type void'
 const getEntries = async () => {
   const user = await getUserByClerkId({});
-
   const entries = await prisma.journalEntry.findMany({
     where: {
       userId: user.id,
     },
     orderBy: {
       createdAt: 'desc',
-    },
+    }
   });
 
   return entries;
