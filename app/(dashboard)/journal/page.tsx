@@ -1,3 +1,4 @@
+import Question from '@/components/Question';
 import EntryCard from '@/components/entries/EntryCard';
 import NewEntryCard from '@/components/entries/NewEntryCard';
 import { getUserByClerkId } from '@/utils/auth';
@@ -25,6 +26,9 @@ const JournalPage = async () => {
   return (
     <div className="p-10 bg-gray-400/30 h-full">
       <h2 className="text-3xl mb-8">Journal</h2>
+      <div className='my-8'>
+        <Question />
+      </div>
       <div className="grid grid-cols-3 gap-4">
         <NewEntryCard />
         {entries.map((entry) => (
