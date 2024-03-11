@@ -1,12 +1,26 @@
 import Anthropic from '@anthropic-ai/sdk';
+import { ChatAnthropic } from '@langchain/anthropic';
+import { PromptTemplate } from '@langchain/core/prompts';
+import { Document } from 'langchain/document';
 import z from 'zod';
 import { StructuredOutputParser } from 'langchain/output_parsers';
-import { PromptTemplate } from '@langchain/core/prompts';
 import { requestAsyncStorage } from 'next/dist/client/components/request-async-storage.external';
+import { loadQARefineChain } from 'langchain/chains';
+import { MemoryVectorStore } from 'langchain/vectorstores/memory';
+import { VoyageEmbeddings } from "@langchain/community/embeddings/voyage";
+
+const anthropic = new Anthropic();
+const chatAnthropic = new ChatAnthropic({
+  temperature: 0.9,
+  modelName: 'claude-3-sonnet-20240229',
+  maxTokens: 1024,
+});
 
 const parser = StructuredOutputParser.fromZodSchema(
   z.object({
-    title: z.string().describe('A descriptive, creative title for the journal entry.'),
+    title: z
+      .string()
+      .describe('A descriptive, creative title for the journal entry.'),
     summary: z
       .string()
       .describe(
@@ -26,38 +40,60 @@ const parser = StructuredOutputParser.fromZodSchema(
 );
 
 const getPrompt = async (content: string) => {
-    const format_instructions = parser.getFormatInstructions()
+  const format_instructions = parser.getFormatInstructions();
 
-    const prompt = new PromptTemplate({
-      template:
-        'Analyze the following journal entry. Follow the instructions and format your response to match the format instructions, no matter what! Do not add any text before or after the JSON response. \n{format_instructions}\n{entry}',
-      inputVariables: ['entry'],
-      partialVariables: { format_instructions },
-    });
+  const prompt = new PromptTemplate({
+    template:
+      'Analyze the following journal entry. Follow the instructions and format your response to match the format instructions, no matter what! Do not add any text before or after the JSON response. \n{format_instructions}\n{entry}',
+    inputVariables: ['entry'],
+    partialVariables: { format_instructions },
+  });
 
-    const input = await prompt.format({
-        entry: content,
-    })
+  const input = await prompt.format({
+    entry: content,
+  });
 
-  console.log(input)
-  return input
-}
-
-const anthropic = new Anthropic();
+  console.log(input);
+  return input;
+};
 
 export const analyze = async (content: any) => {
-  const input = await getPrompt(content)
+  const input = await getPrompt(content);
   const result = await anthropic.messages.create({
     model: 'claude-3-opus-20240229',
     max_tokens: 1024,
     messages: [{ role: 'user', content: input }],
   });
 
-  const textResult = result.content[0].text
-  
+  const textResult = result.content[0].text;
+
   try {
-    return parser.parse(textResult)
+    return parser.parse(textResult);
   } catch (err) {
-    console.log(err)
+    console.log(err);
   }
+};
+
+export const qa = async (
+  question: string,
+  entries: { content: string; id: string; createdAt: Date }[]
+) => {
+  const docs = entries.map(
+    (entry) =>
+      new Document({
+        pageContent: entry.content,
+        metadata: { id: entry.id, createdAt: entry.createdAt },
+      })
+  );
+
+  const chain = loadQARefineChain(chatAnthropic);
+  const embedding = new VoyageEmbeddings();
+  const store = await MemoryVectorStore.fromDocuments(docs, embedding);
+  const relevantDocs = await store.similaritySearch(question);
+  const res = await chain.invoke({
+    input_documents: relevantDocs,
+    question
+  })
+
+  return res.output_text
 };
