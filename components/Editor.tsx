@@ -22,7 +22,7 @@ const Editor = ({ entry }: editorProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [analysis, setAnalysis] = useState(entry.analysis);
 
-  const { title, summary, topic, color } = analysis || entry.analysis;
+  const { title, summary, topic, color } = entry.analysis;
 
   const analysisData = [
     { name: 'Topics', value: topic },
