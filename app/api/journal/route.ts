@@ -18,10 +18,7 @@ export const POST = async () => {
     await prisma.analysis.create({
       data: {
         entryId: entry.id,
-        title: analysis.title || 'Default title',
-        summary: analysis.summary || '',
-        topic: analysis.topic || '',
-        color: analysis.color || '',
+        ...analysis
       },
     });
   }
