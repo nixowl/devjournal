@@ -16,13 +16,11 @@ const Question = () => {
   };
 
   const handleSubmit = async (e: any) => {
-    console.log('handle submit....');
+    setAnswer('')
     e.preventDefault();
     setLoading(true);
 
-    console.log('calling ask question')
     const answer = await askQuestion(question);
-    console.log('askQuestion response: ', answer)
     setAnswer(answer);
     setQuestion('');
     setLoading(false);
