@@ -5,9 +5,9 @@ import { Document } from 'langchain/document';
 import z from 'zod';
 import { StructuredOutputParser } from 'langchain/output_parsers';
 import { requestAsyncStorage } from 'next/dist/client/components/request-async-storage.external';
-import { loadQARefineChain } from 'langchain/chains';
+import { loadQAStuffChain } from 'langchain/chains';
 import { MemoryVectorStore } from 'langchain/vectorstores/memory';
-import { VoyageEmbeddings } from "@langchain/community/embeddings/voyage";
+import { VoyageEmbeddings } from '@langchain/community/embeddings/voyage';
 
 const anthropic = new Anthropic();
 const chatAnthropic = new ChatAnthropic({
@@ -18,7 +18,8 @@ const chatAnthropic = new ChatAnthropic({
 
 const parser = StructuredOutputParser.fromZodSchema(
   z.object({
-    title: z
+    productivityScore: z.number().describe('judgement of the productivity of the activities in the text and rated on a scale from -10 to 10, where -10 is extremely unproductive, 0 is neutral, and 10 is extremely productive.'),
+     title: z
       .string()
       .describe('A descriptive, creative title for the journal entry.'),
     summary: z
@@ -81,19 +82,26 @@ export const qa = async (
   const docs = entries.map(
     (entry) =>
       new Document({
-        pageContent: entry.content,
+        pageContent: `${entry.content}\n\nDate: ${entry.createdAt}`,
         metadata: { id: entry.id, createdAt: entry.createdAt },
       })
   );
 
-  const chain = loadQARefineChain(chatAnthropic);
+  const chain = loadQAStuffChain(chatAnthropic);
+  const currentDate = new Date();
+
+  const day = currentDate.getDate();
+  const month = currentDate.getMonth() + 1;
+  const year = currentDate.getFullYear();
+  const prompt = `Provide a concise response to the following question, taking into account the dates mentioned in the context and that today is ${month} ${day} ${year}. Responses do not have to start with "Based on the context provided". Here is the question: `;
   const embedding = new VoyageEmbeddings();
   const store = await MemoryVectorStore.fromDocuments(docs, embedding);
   const relevantDocs = await store.similaritySearch(question);
   const res = await chain.invoke({
     input_documents: relevantDocs,
-    question
-  })
-
-  return res.output_text
+    prompt,
+    question,
+  });
+  console.log(prompt)
+  return res.text;
 };
