@@ -54,6 +54,7 @@ model Analysis {
   topic   String // Topic of the Analysis
   summary String @db.Text // Summary of the Analysis
   color   String // Color associated with the Analysis
+  productivityScore Float @default(0)
 
   @@unique([entryId]) // Ensures uniqueness of the entryId field
 }
