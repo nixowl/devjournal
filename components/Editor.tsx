@@ -8,7 +8,7 @@ type editorProps = {
   entry: {
     id: string;
     content: string;
-    analysis: {
+    analysis?: {
       title: string;
       summary: string;
       topic: string;
@@ -17,17 +17,12 @@ type editorProps = {
   };
 };
 
-const Editor = ({ entry }: editorProps) => {
+const Editor: React.FC<editorProps> = ({ entry }) => {
   const [content, setContent] = useState(entry.content);
   const [isLoading, setIsLoading] = useState(false);
   const [analysis, setAnalysis] = useState(entry.analysis);
 
-  const { title, summary, topic, color } = entry.analysis;
-
-  const analysisData = [
-    { name: 'Topics', value: topic },
-    { name: 'Summary', value: summary },
-  ];
+  console.log(entry, 'ENTRY');
 
   useAutosave({
     data: content,
@@ -39,6 +34,13 @@ const Editor = ({ entry }: editorProps) => {
       setIsLoading(false);
     },
   });
+  console.log(entry.analysis);
+  // const { title, summary, topic, color } = entry.analysis
+
+  // const analysisData = [
+  //   { name: 'Topics', value: topic },
+  //   { name: 'Summary', value: summary },
+  // ];
 
   return (
     <div className="w-full h-full grid grid-cols-3">
@@ -51,11 +53,11 @@ const Editor = ({ entry }: editorProps) => {
         />
       </div>
       <div className="border-l border-gray/35">
-        <div className="px-6 py-10" style={{ backgroundColor: color }}>
-          <h2 className="text-2xl">{title}</h2>
+        <div className="px-6 py-10" style={{ backgroundColor: '#fff' }}>
+          <h2 className="text-2xl">title</h2>
         </div>
         <div>
-          <ul>
+          {/* <ul>
             {analysisData.map((item) => (
               <li
                 key={item.name}
@@ -65,7 +67,8 @@ const Editor = ({ entry }: editorProps) => {
                 <span>{item.value}</span>
               </li>
             ))}
-          </ul>
+          </ul> */}
+          data
         </div>
       </div>
     </div>

@@ -23,6 +23,7 @@ model User {
   clerkId String         @unique // Unique identifier for the User's clerk
   email   String         @unique // Unique email address of the User
   entries JournalEntry[] // List of JournalEntries associated with the User
+  analyses Analysis[]
 }
 
 // Represents a Journal Entry in the system
@@ -50,13 +51,17 @@ model Analysis {
   entryId String // Foreign key referencing the JournalEntry model
   entry   JournalEntry @relation(fields: [entryId], references: [id], onDelete: Cascade) // Relation to the JournalEntry model using the entryId field
 
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   title String // AI generated journal entry title
   topic   String // Topic of the Analysis
-  summary String @db.Text // Summary of the Analysis
+  summary String // Summary of the Analysis
   color   String // Color associated with the Analysis
   productivityScore Float @default(0)
 
   @@unique([entryId]) // Ensures uniqueness of the entryId field
+  @@index([userId])
 }
 
 // After making changes to db, run npx prisma db push

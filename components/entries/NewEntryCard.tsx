@@ -14,14 +14,19 @@ import { Badge } from '../ui/badge';
 import { createNewEntry } from '@/utils/api';
 import { revalidatePath } from 'next/cache';
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 const NewEntryCard = () => {
+  const [loading, setLoading] = useState(false)
   const router = useRouter();
 
   const handleOnClick = async () => {
+    setLoading(true)
     const data = await createNewEntry();
-    console.log(data);
-    router.push(`/journal/${data.id}`);
+    if (data) {
+      router.push(`/journal/${data.id}`)
+    } 
+    setLoading(false)
   };
 
   return (
@@ -32,7 +37,7 @@ const NewEntryCard = () => {
       <CardHeader>
         <CardTitle>New entry</CardTitle>
       </CardHeader>
-      <CardContent>New entry</CardContent>
+      {loading && <CardContent>Preparing entry and AI...</CardContent>}
     </Card>
   );
 };

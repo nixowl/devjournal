@@ -5,7 +5,7 @@ import { revalidatePath } from 'next/cache';
 import { NextResponse } from 'next/server';
 
 export const POST = async () => {
-  const user = await getUserByClerkId({});
+  const user = await getUserByClerkId();
   const entry = await prisma.journalEntry.create({
     data: {
       userId: user.id,
@@ -17,6 +17,7 @@ export const POST = async () => {
   if (analysis) {
     await prisma.analysis.create({
       data: {
+        userId: user.id,
         entryId: entry.id,
         ...analysis
       },
