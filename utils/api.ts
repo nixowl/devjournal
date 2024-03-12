@@ -37,8 +37,6 @@ export const askQuestion = async (question: string) => {
 
   if (res.ok) {
     const data = await res.json();
-    console.log(data, 'data');
-    console.log(data.data, 'data.data');
     return data.data;
   }
 };
